@@ -54,6 +54,7 @@
 		2C87977518FF06E700AE2A45 /* StatusfyTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "StatusfyTests-Info.plist"; sourceTree = "<group>"; };
 		2C87977718FF06E700AE2A45 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		2C87977918FF06E700AE2A45 /* StatusfyTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StatusfyTests.m; sourceTree = "<group>"; };
+		8DEB976A2556F20400F15D1E /* Statusfy.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Statusfy.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -119,6 +120,7 @@
 		2C87975518FF06E600AE2A45 /* Statusfy */ = {
 			isa = PBXGroup;
 			children = (
+				8DEB976A2556F20400F15D1E /* Statusfy.entitlements */,
 				2C87976118FF06E600AE2A45 /* SFYAppDelegate.h */,
 				2C87976218FF06E600AE2A45 /* SFYAppDelegate.m */,
 				2C87976418FF06E600AE2A45 /* MainMenu.xib */,
@@ -208,6 +210,10 @@
 				LastUpgradeCheck = 1200;
 				ORGANIZATIONNAME = "Paul Young";
 				TargetAttributes = {
+					2C87974B18FF06E600AE2A45 = {
+						DevelopmentTeam = DXJTJL67C2;
+						ProvisioningStyle = Automatic;
+					};
 					2C87976C18FF06E600AE2A45 = {
 						TestTargetID = 2C87974B18FF06E600AE2A45;
 					};
@@ -434,13 +440,18 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_ENTITLEMENTS = Statusfy/Statusfy.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = DXJTJL67C2;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Statusfy/Statusfy-Prefix.pch";
 				INFOPLIST_FILE = "Statusfy/Statusfy-Info.plist";
+				MARKETING_VERSION = 1.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "me.paulyoung.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -449,13 +460,18 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_ENTITLEMENTS = Statusfy/Statusfy.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = DXJTJL67C2;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Statusfy/Statusfy-Prefix.pch";
 				INFOPLIST_FILE = "Statusfy/Statusfy-Info.plist";
+				MARKETING_VERSION = 1.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "me.paulyoung.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
