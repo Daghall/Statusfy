@@ -8,17 +8,14 @@
 
 #import "SFYAppDelegate.h"
 
-
-static NSString * const SFYPlayerStatePreferenceKey = @"ShowPlayerState";
-static NSString * const SFYPlayerDockIconPreferenceKey = @"YES";
-static int const titleMaxLength = 40;
+static int const titleMaxLength = 42;
 
 @interface SFYAppDelegate ()
 
 @property (nonatomic, strong) NSMenu *menu;
 @property (nonatomic, strong) NSMenuItem *playPauseMenuItem;
 @property (nonatomic, strong) NSMenuItem *trackInfoMenuItem;
-@property (nonatomic, strong) NSMenuItem *playerStateMenuItem;
+@property (nonatomic, strong) NSMenuItem *playNextTrackMenuItem;
 @property (nonatomic, strong) NSMenuItem *dockIconMenuItem;
 @property (nonatomic, strong) NSStatusItem *statusItem;
 @property NSString *stateAndTrack;
@@ -29,36 +26,30 @@ static int const titleMaxLength = 40;
 
 - (void)applicationDidFinishLaunching:(NSNotification * __unused)aNotification
 {
-    //Initialize the variable the getDockIconVisibility method checks
-    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:SFYPlayerDockIconPreferenceKey];
-    
     self.statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
     self.statusItem.highlightMode = YES;
-    
+
     self.menu = [[NSMenu alloc] initWithTitle:@""];
-    
+
     self.playPauseMenuItem = [[NSMenuItem alloc] initWithTitle:[self determinePlayPauseMenuItemTitle] action:@selector(togglePlayState) keyEquivalent:@""];
 
     self.trackInfoMenuItem = [[NSMenuItem alloc] initWithTitle:@"" action:nil keyEquivalent:@"" ];
 
-    NSMenuItem *copySpotifyLinkMenuItem = [[NSMenuItem alloc] initWithTitle:@"Copy Spotify link" action:@selector(copySpotifyLinkToClipboard) keyEquivalent:@"" ];
+    self.playNextTrackMenuItem = [[NSMenuItem alloc] initWithTitle:@"▶❘\tNext" action:@selector(playNextTrack) keyEquivalent:@"" ];
 
-    self.playerStateMenuItem = [[NSMenuItem alloc] initWithTitle:[self determinePlayerStateMenuItemTitle] action:@selector(togglePlayerStateVisibility) keyEquivalent:@""];
-    
-    self.dockIconMenuItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Hide Dock Icon", nil) action:@selector(toggleDockIconVisibility) keyEquivalent:@""];
-    
+    NSMenuItem *copySpotifyLinkMenuItem = [[NSMenuItem alloc] initWithTitle:@"Copy Spotify Link" action:@selector(copySpotifyLinkToClipboard) keyEquivalent:@"" ];
+
     [self.menu addItem:self.trackInfoMenuItem];
     [self.menu addItem:[NSMenuItem separatorItem]];
     [self.menu addItem:self.playPauseMenuItem];
-    [self.menu addItem:copySpotifyLinkMenuItem];
+    [self.menu addItem:self.playNextTrackMenuItem];
     [self.menu addItem:[NSMenuItem separatorItem]];
-    [self.menu addItem:self.playerStateMenuItem];
-    [self.menu addItem:self.dockIconMenuItem];
+    [self.menu addItem:copySpotifyLinkMenuItem];
     [self.menu addItem:[NSMenuItem separatorItem]];
     [self.menu addItemWithTitle:NSLocalizedString(@"Quit", nil) action:@selector(quit) keyEquivalent:@"q"];
 
     [self.statusItem setMenu:self.menu];
-    
+
     [self setStatusItemTitle];
     [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(setStatusItemTitle) userInfo:nil repeats:YES];
 }
@@ -69,8 +60,8 @@ static int const titleMaxLength = 40;
 {
     NSString *trackName = [[self executeAppleScript:@"get name of current track"] stringValue];
     NSString *artistName = [[self executeAppleScript:@"get artist of current track"] stringValue];
-    NSString *titleText = [NSString stringWithFormat:@"%@ – %@", trackName, artistName];
     NSString *playerState = [self determinePlayerState];
+    NSString *titleText = [NSString stringWithFormat:@"%@ %@ – %@", playerState, trackName, artistName];
 
     NSString *stateAndTrack = [NSString stringWithFormat:@"%@%@%@", playerState, trackName, artistName];
 
@@ -86,11 +77,7 @@ static int const titleMaxLength = 40;
         if (titleText.length > titleMaxLength) {
             titleText = [[titleText substringToIndex:titleMaxLength] stringByAppendingString:@"…"];
         }
-        
-        if ([self getPlayerStateVisibility]) {
-            titleText = [NSString stringWithFormat:@"%@ %@", playerState, titleText];
-        }
-        
+
         if (self.statusItem.menu != self.menu) {
             [self.statusItem setMenu:self.menu];
         }
@@ -137,23 +124,16 @@ static int const titleMaxLength = 40;
     return eventDescriptor;
 }
 
-#pragma mark - Player state
-
-- (BOOL)getPlayerStateVisibility
-{
-    return [[NSUserDefaults standardUserDefaults] boolForKey:SFYPlayerStatePreferenceKey];
-}
-
-- (void)setPlayerStateVisibility:(BOOL)visible
-{
-    [[NSUserDefaults standardUserDefaults] setBool:visible forKey:SFYPlayerStatePreferenceKey];
-    self.stateAndTrack = nil; // Force repaint
-}
-
 - (void)togglePlayState
 {
     [self executeAppleScript:@"playpause"];
     [self setPlayPauseMenuItemTitle];
+}
+
+
+- (void)playNextTrack
+{
+    [self executeAppleScript:@"play next track"];
 }
 
 - (void)setPlayPauseMenuItemTitle
@@ -161,20 +141,9 @@ static int const titleMaxLength = 40;
     self.playPauseMenuItem.title = [self determinePlayPauseMenuItemTitle];
 }
 
-- (void)togglePlayerStateVisibility
-{
-    [self setPlayerStateVisibility:![self getPlayerStateVisibility]];
-    self.playerStateMenuItem.title = [self determinePlayerStateMenuItemTitle];
-}
-
 - (NSString *)determinePlayPauseMenuItemTitle
 {
-    return [[self determinePlayerState] isEqualToString:@"►"] ? NSLocalizedString(@"❚❚ Pause ", nil) : NSLocalizedString(@"► Play", nil);
-}
-
-- (NSString *)determinePlayerStateMenuItemTitle
-{
-    return [self getPlayerStateVisibility] ? NSLocalizedString(@"Hide Player State", nil) : NSLocalizedString(@"Show Player State", nil);
+    return [[self determinePlayerState] isEqualToString:@"►"] ? NSLocalizedString(@"❚❚\tPause ", nil) : NSLocalizedString(@"►\tPlay", nil);
 }
 
 - (void)copySpotifyLinkToClipboard
@@ -188,7 +157,7 @@ static int const titleMaxLength = 40;
 {
     NSString *playerStateText = nil;
     NSString *playerStateConstant = [[self executeAppleScript:@"get player state"] stringValue];
-    
+
     if ([playerStateConstant isEqualToString:@"kPSP"]) {
         playerStateText = NSLocalizedString(@"►", nil);
     }
@@ -198,43 +167,8 @@ static int const titleMaxLength = 40;
     else {
         playerStateText = NSLocalizedString(@"◼", nil);
     }
-    
+
     return playerStateText;
-}
-
-#pragma mark - Toggle Dock Icon
-
-- (BOOL)getDockIconVisibility
-{
-    return [[NSUserDefaults standardUserDefaults] boolForKey:SFYPlayerDockIconPreferenceKey];
-}
-
-- (void)setDockIconVisibility:(BOOL)visible
-{
-   [[NSUserDefaults standardUserDefaults] setBool:visible forKey:SFYPlayerDockIconPreferenceKey];
-}
-
-- (void)toggleDockIconVisibility
-{
-    [self setDockIconVisibility:![self getDockIconVisibility]];
-    self.dockIconMenuItem.title = [self determineDockIconMenuItemTitle];
-    
-    if(![self getDockIconVisibility])
-    {
-        //Apple recommended method to show and hide dock icon
-        //hide icon
-        [NSApp setActivationPolicy: NSApplicationActivationPolicyAccessory];
-    }
-    else
-    {
-        //show icon
-        [NSApp setActivationPolicy: NSApplicationActivationPolicyRegular];
-    }
-}
-
-- (NSString *)determineDockIconMenuItemTitle
-{
-    return [self getDockIconVisibility] ? NSLocalizedString(@"Hide Dock Icon", nil) : NSLocalizedString(@"Show Dock Icon", nil);
 }
 
 #pragma mark - Quit
