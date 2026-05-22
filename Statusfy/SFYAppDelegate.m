@@ -27,7 +27,7 @@ static int const titleMaxLength = 42;
 - (void)applicationDidFinishLaunching:(NSNotification * __unused)aNotification
 {
     self.statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
-    self.statusItem.highlightMode = YES;
+    ((NSButtonCell *)self.statusItem.button.cell).highlightsBy = NSChangeBackgroundCellMask;
 
     self.menu = [[NSMenu alloc] initWithTitle:@""];
 
@@ -82,13 +82,13 @@ static int const titleMaxLength = 42;
             [self.statusItem setMenu:self.menu];
         }
 
-        self.statusItem.image = nil;
-        self.statusItem.title = titleText;
+        self.statusItem.button.image = nil;
+        self.statusItem.button.title = titleText;
     } else {
         NSImage *image = [NSImage imageNamed:@"status_icon"];
         [image setTemplate:true];
-        self.statusItem.image = image;
-        self.statusItem.title = nil;
+        self.statusItem.button.image = image;
+        self.statusItem.button.title = @"";
         [self showDisabledMenu];
     }
 }
